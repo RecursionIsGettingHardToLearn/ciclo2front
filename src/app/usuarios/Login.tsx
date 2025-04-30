@@ -15,6 +15,7 @@ const Login = () => {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    console.log("Datos enviados al backend:", { username, password }); // Log de los datos enviados al backend
     try {
       const response = await AxiosInstance.post("/user/auth/login/", {
         username,
@@ -22,7 +23,7 @@ const Login = () => {
       });
       console.log("Respuesta del servidor:", response); // Log de la respuesta completa
       console.log("Datos de la respuesta:", response.data); // Log de los datos de la respuesta
-      console.log("Datos enviados al backend:", { username, password }); // Log de los datos enviados al backend
+      
       console.log("Estado de la respuesta:", response.status); // Log del estado de la respuesta
 
       console.log(response.data)

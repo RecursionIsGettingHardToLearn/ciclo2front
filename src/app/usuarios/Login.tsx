@@ -20,8 +20,13 @@ const Login = () => {
         username,
         password,
       });
+      console.log("Respuesta del servidor:", response); // Log de la respuesta completa
+      console.log("Datos de la respuesta:", response.data); // Log de los datos de la respuesta
+
+      console.log(response.data)
   
       const { token, user } = response.data;
+      console.log("Rol del usuario:", user.rol.nombre); // Log del rol del usuario
   
       localStorage.setItem("token", token); // Guarda el token
   

@@ -1,5 +1,6 @@
 import Navbar from "@/components/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { myBaseUrl } from "@/components/AxiosInstance";
 
 export default function Home() {
   return (
@@ -26,7 +27,7 @@ export default function Home() {
             {/* Imagen o promoción derecha */}
             <div className="bg-white p-8 flex items-center justify-center">
               <img
-                src="http://127.0.0.1:8000/static/img/logo-donbosco.png"
+                src={`${myBaseUrl}/static/img/logo-donbosco.png`}
                 alt="Don Bosco"
                 className="h-40 w-40 object-contain"
               />

@@ -20,6 +20,19 @@ AxiosInstance.interceptors.request.use((config) => {
     if (token) config.headers.Authorization = `Token ${token}`;
     return config;
   });
-  
+
+AxiosInstance.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response) {
+            // Manejar errores específicos
+            if (error.response.status === 401) {
+                console.error("No autorizado. Redirigiendo al login...");
+                // Redirigir al login o manejar el error
+            }
+        }
+        return Promise.reject(error);
+    }
+);
 
 export default AxiosInstance

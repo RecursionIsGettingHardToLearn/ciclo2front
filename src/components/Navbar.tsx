@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
+import { myBaseUrl } from "./AxiosInstance";
 
 export default function Navbar() {
   return (
@@ -8,7 +9,7 @@ export default function Navbar() {
         {/* Logo + Nombre */}
         <Link to="/" className="flex items-center gap-3">
           <img
-            src="http://127.0.0.1:8000/static/img/logo-donbosco.png"
+            src={`${myBaseUrl}/static/img/logo-donbosco.png`}
             alt="Colegio Don Bosco"
             className="h-10 w-10 object-contain"
           />

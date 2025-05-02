@@ -14,6 +14,8 @@ const Login = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const navigate = useNavigate();
 
+  console.log(AxiosInstance.defaults.baseURL); // Log de la URL base de Axios
+
   const handleLogin = async () => {
     console.log("Datos enviados al backend:", { username, password }); // Log de los datos enviados al backend
     try {

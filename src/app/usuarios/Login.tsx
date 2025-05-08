@@ -60,6 +60,7 @@ const Login = () => {
           setErrorMsg("Rol no reconocido");
       }
     } catch (error: any) {
+      console.log('Error en iniciar sesion')
       console.error(error);
       setErrorMsg(error?.response?.data?.error || "Error de login");
     }

@@ -11,18 +11,19 @@ import { Alert } from "@/components/ui/alert";
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    ci: "",
-    username: "",
-    email: "",
-    nombre: "",
-    apellido: "",
-    edad: "",
-    foto: "",
-    telefono: "",
-    rol_id: "",
-    password: "",
-    confirmPassword: "",
+    ci: "88",
+    username: "aaa",
+    email: "superadmin@clegio.edu.bo",
+    nombre: "Juan",
+    apellido: "Pérez",
+    fecha_nacimiento: "1990-01-01",
+    foto: null,
+    telefono: "7123567",
+    rol_id: "4", // SuperAdmin
+    password: "aaa",
+    confirmPassword: "aaa",
   });
+
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const navigate = useNavigate();
@@ -36,7 +37,6 @@ const Register = () => {
     setErrorMsg("");
     setSuccessMsg("");
 
-    // Validaciones
     if (
       !formData.username ||
       !formData.email ||
@@ -54,8 +54,8 @@ const Register = () => {
       return;
     }
 
-    if (isNaN(Number(formData.edad)) || Number(formData.edad) <= 0) {
-      setErrorMsg("Por favor, ingresa una edad válida.");
+    if (!formData.fecha_nacimiento) {
+      setErrorMsg("Por favor, ingresa una fecha de nacimiento válida.");
       return;
     }
 
@@ -65,24 +65,21 @@ const Register = () => {
     }
 
     try {
-      // Crear un objeto FormData
       const dataToSend = new FormData();
       dataToSend.append("ci", formData.ci);
       dataToSend.append("username", formData.username);
       dataToSend.append("email", formData.email);
       dataToSend.append("nombre", formData.nombre);
       dataToSend.append("apellido", formData.apellido);
-      dataToSend.append("edad", formData.edad);
+      dataToSend.append("fecha_nacimiento", formData.fecha_nacimiento);
       dataToSend.append("telefono", formData.telefono);
       dataToSend.append("rol_id", formData.rol_id);
       dataToSend.append("password", formData.password);
 
-      // Agregar la foto si existe
       if (formData.foto) {
         dataToSend.append("foto", formData.foto);
       }
 
-      // Enviar la solicitud con Axios
       const response = await AxiosInstance.post("/user/auth/register/", dataToSend, {
         headers: {
           "Content-Type": "multipart/form-data",
@@ -90,21 +87,15 @@ const Register = () => {
       });
 
       setSuccessMsg("Usuario registrado exitosamente.");
-      console.log("User registered successfully:", response.data);
-
       setTimeout(() => {
         navigate("/login");
       }, 2000);
     } catch (error: any) {
-      console.error(error);
-
-      // Manejar errores del servidor
       if (error.response && error.response.data) {
         const serverErrors = error.response.data;
         if (typeof serverErrors === "string") {
-          setErrorMsg(serverErrors); // Si el servidor devuelve un mensaje de error como string
+          setErrorMsg(serverErrors);
         } else if (typeof serverErrors === "object") {
-          // Si el servidor devuelve un objeto con múltiples errores
           const errorMessages = Object.values(serverErrors).flat().join(", ");
           setErrorMsg(errorMessages);
         } else {
@@ -122,83 +113,23 @@ const Register = () => {
         <CardContent>
           <h2 className="text-2xl font-bold mb-4">Registro</h2>
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="ci">CI</Label>
-              <Input id="ci" name="ci" value={formData.ci} onChange={handleChange} />
-            </div>
+            
             <div>
               <Label htmlFor="username">Usuario</Label>
               <Input id="username" name="username" value={formData.username} onChange={handleChange} />
             </div>
-            <div>
-              <Label htmlFor="email">Correo Electrónico</Label>
-              <Input id="email" name="email" type="email" value={formData.email} onChange={handleChange} />
-            </div>
-            <div>
-              <Label htmlFor="nombre">Nombre</Label>
-              <Input id="nombre" name="nombre" value={formData.nombre} onChange={handleChange} />
-            </div>
-            <div>
-              <Label htmlFor="apellido">Apellido</Label>
-              <Input id="apellido" name="apellido" value={formData.apellido} onChange={handleChange} />
-            </div>
-            <div>
-              <Label htmlFor="edad">Edad</Label>
-              <Input id="edad" name="edad" type="number" value={formData.edad} onChange={handleChange} />
-            </div>
-            <div>
-              <Label htmlFor="foto">Foto</Label>
-              <Input
-                id="foto"
-                name="foto"
-                type="file"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) {
-                    setFormData({ ...formData, foto: file });
-                  }
-                }}
-              />
-            </div>
-            <div>
-              <Label htmlFor="telefono">Teléfono</Label>
-              <Input id="telefono" name="telefono" value={formData.telefono} onChange={handleChange} />
-            </div>
-            <div>
-              <Label htmlFor="rol_id">Rol</Label>
-              <select
-                id="rol_id"
-                name="rol_id"
-                value={formData.rol_id}
-                onChange={(e) => setFormData({ ...formData, rol_id: e.target.value })}
-                className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-                <option value="">Selecciona un rol</option>
-                <option value="1">Alumno</option>
-                <option value="2">Director</option>
-                <option value="3">Director Distrital</option>
-                <option value="4">Profesor</option>
-                <option value="5">Tutor</option>
-              </select>
-            </div>
+
             <div>
               <Label htmlFor="password">Contraseña</Label>
-              <Input id="password" name="password" type="password" value={formData.password} onChange={handleChange} />
+              <Input id="password" name="password" type="text" value={formData.password} onChange={handleChange} />
             </div>
-            <div>
-              <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
-              <Input
-                id="confirmPassword"
-                name="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-              />
-            </div>
+            
             {errorMsg && <Alert variant="destructive">{errorMsg}</Alert>}
             {successMsg && <Alert variant="default">{successMsg}</Alert>}
-            <Button onClick={handleRegister} className="w-full">
-              Registrarse
+            <Button
+              onClick={handleRegister}
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-xl shadow-md transition duration-300 ease-in-out"
+            >Registrarse
             </Button>
           </div>
         </CardContent>
@@ -206,24 +137,5 @@ const Register = () => {
     </div>
   );
 };
-
-
-export function ObtenerRolID(nombreRol) {
-    switch (nombreRol) {
-      case "alumno":
-        return 1;
-      case "director":
-        return 2;
-      case "director distrital":
-        return 3;
-      case "profesor":
-        return 4;
-      case "tutor":
-        return 5;
-      default:
-        return 0;
-    }
-}
-
 
 export default Register;

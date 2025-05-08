@@ -32,7 +32,7 @@ const Login = () => {
       // Redirección según el rol
       console.log(user.rol.nombre)
       switch (user.rol.nombre) {
-        case "alumno":
+        case "estudiante":
           navigate("/dashboard/alumno", { state: { user } });
           break;
         case "tutor":
@@ -44,7 +44,7 @@ const Login = () => {
         case "admin":
           navigate("/dashboard/admin", { state: { user } });
           break;
-        case "SuperAdmin":
+        case "superadmin":
           navigate("/dashboard/superadmin", { state: { user } });
           break;
         default:

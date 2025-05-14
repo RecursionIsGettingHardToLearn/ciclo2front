@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import AxiosInstance from "../../components/AxiosInstance";
 import {
   Plus,
@@ -131,9 +131,9 @@ export default function SuperAdminUnidades(): JSX.Element {
   }, []);
 
   // Filtrado de admins por CI
-  const adminsFiltrados = adminQuery.length >= 7
+  /* const adminsFiltrados = adminQuery.length >= 7
     ? admins.filter((a) => a.ci.includes(adminQuery))
-    : [];
+    : []; */
 
   // Iniciar creación de nueva unidad
   const nuevo = (): void => {
@@ -400,6 +400,37 @@ export default function SuperAdminUnidades(): JSX.Element {
               />
             </div>
           </div>
+
+          {/* Búsqueda de Admin por CI */}
+         <div className="md:col-span-2">
+           <label className="font-medium">Buscar Admin (CI)</label>
+           <input
+             type="text"
+             value={adminQuery}
+             onChange={e => setAdminQuery(e.currentTarget.value)}
+             className="w-full border rounded-lg px-3 py-2"
+             placeholder="Empieza a escribir al menos 7 dígitos de CI"
+           />
+           {adminQuery.length >= 7 && (
+             <ul className="border mt-1 max-h-32 overflow-auto rounded-lg">
+               {admins
+                 .filter(a => a.ci.includes(adminQuery))
+                 .map(a => (
+                   <li
+                     key={a.id}
+                     onClick={() => {
+                       setForm(f => ({ ...f, adminId: a.id }));
+                       setAdminQuery(`${a.nombre} — ${a.ci}`);
+                     }}
+                     className="px-3 py-1 cursor-pointer hover:bg-blue-100"
+                   >
+                     {a.nombre} — {a.ci}
+                   </li>
+                 ))
+               }
+             </ul>
+           )}
+         </div>
 
           <div className="flex justify-end gap-3">
             <button

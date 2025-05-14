@@ -11,10 +11,11 @@ interface Props {
     email: string;
     fechaNacimiento: string;
     username: string;
-    foto: string;
+    foto: string | null;
   };
   onClose: () => void;
   onSave: (data: any) => void;
+  onLogout: () => Promise<void>;
 }
 
 export default function PerfilModal({ user, onClose, onSave }: Props) {

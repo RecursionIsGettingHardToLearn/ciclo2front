@@ -1,8 +1,6 @@
-// src/app/dashboard/SuperAdminColegios.tsx
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, ChangeEvent } from "react";
 import { Plus, Pencil, Trash, X } from "lucide-react";
 import AxiosInstance from "../../components/AxiosInstance";
-// asegúrate de que esté bien la ruta
 
 interface Colegio {
   id: string;
@@ -12,51 +10,64 @@ interface Colegio {
   logoUrl?: string;
 }
 
-export default function SuperAdminColegios() {
+interface Superadmin {
+  id: number;
+  nombre: string;
+}
+
+interface FormState {
+  nombre: string;
+  direccion: string;
+  telefono: string;
+  logoFile: File | null;
+  logoPreview: string;
+  usuario_id: string;
+}
+
+const SuperAdminColegios: React.FC = (): JSX.Element => {
   const [colegios, setColegios] = useState<Colegio[]>([]);
-  const [showForm, setShowForm] = useState(false);
+  const [superadmins, setSuperadmins] = useState<Superadmin[]>([]);
+  const [showForm, setShowForm] = useState<boolean>(false);
   const [editando, setEditando] = useState<Colegio | null>(null);
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FormState>({
     nombre: "",
     direccion: "",
     telefono: "",
-    logoFile: null as File | null,
+    logoFile: null,
     logoPreview: "",
     usuario_id: "",
   });
 
+  // Cargar lista de colegios
   useEffect(() => {
-    const cargarColegios = async () => {
+    const cargarColegios = async (): Promise<void> => {
       try {
-        const res = await AxiosInstance.get("/institucion/listar-colegios/");
-
-        // Suponiendo que AxiosInstance.baseURL === "http://localhost:8000"
-        const data: Colegio[] = res.data.map((item: any) => ({
-          id: item.id,
+        const res = await AxiosInstance.get<any[]>("/institucion/listar-colegios/");
+        const data: Colegio[] = res.data.map((item) => ({
+          id: String(item.id),
           nombre: item.nombre,
           direccion: item.direccion,
           telefono: item.telefono,
-          /** añade el dominio solo si hay logo */
-          logoUrl: item.logo ? `${AxiosInstance.defaults.baseURL}${item.logo}` : undefined,
+          logoUrl: item.logo
+            ? `${AxiosInstance.defaults.baseURL}${item.logo}`
+            : undefined,
         }));
-
         setColegios(data);
       } catch (err) {
         console.error("Error al cargar colegios:", err);
         alert("No se pudieron cargar los colegios.");
       }
     };
-
     cargarColegios();
   }, []);
-  const [superadmins, setSuperadmins] = useState<{ id: number; nombre: string }[]>([]);
 
+  // Cargar superadmins
   useEffect(() => {
-    const cargarSuperadmins = async () => {
+    const cargarSuperadmins = async (): Promise<void> => {
       try {
-        const res = await AxiosInstance.get("/user/auth/listar-superadmins/");
-        const data = res.data.map((item: any) => ({
-          id: item.usuario_id,
+        const res = await AxiosInstance.get<any[]>("/user/auth/listar-superadmins/");
+        const data: Superadmin[] = res.data.map((item) => ({
+          id: Number(item.usuario_id),
           nombre: `${item.usuario.nombre} ${item.usuario.apellido}`,
         }));
         setSuperadmins(data);
@@ -64,95 +75,99 @@ export default function SuperAdminColegios() {
         console.error("Error al cargar superadmins:", err);
       }
     };
-
     cargarSuperadmins();
   }, []);
 
-
-  // 2 · Abrir nuevo
-  const abrirNuevo = () => {
-    setForm({ nombre: "", direccion: "", telefono: "", logoFile: null, logoPreview: "" });
+  // Abrir formulario en modo "nuevo"
+  const abrirNuevo = (): void => {
+    setForm({
+      nombre: "",
+      direccion: "",
+      telefono: "",
+      logoFile: null,
+      logoPreview: "",
+      usuario_id: "",
+    });
     setEditando(null);
     setShowForm(true);
   };
 
-  // 3 · Abrir editar
-  const abrirEditar = (c: Colegio) => {
+  // Abrir formulario en modo "editar"
+  const abrirEditar = (c: Colegio): void => {
     setForm({
       nombre: c.nombre,
       direccion: c.direccion,
       telefono: c.telefono,
       logoFile: null,
-      logoPreview: c.logoUrl || "",
+      logoPreview: c.logoUrl ?? "",
+      usuario_id: "", // asume que lo obtendrás del objeto si lo necesitas
     });
     setEditando(c);
     setShowForm(true);
   };
 
-  // 4 · File input manejado con botón
-  const onFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Manejar cambio de archivo
+  const onFileChange = (e: ChangeEvent<HTMLInputElement>): void => {
     const file = e.target.files?.[0] ?? null;
     const preview = file ? URL.createObjectURL(file) : form.logoPreview;
     setForm((f) => ({ ...f, logoFile: file, logoPreview: preview }));
   };
 
-
-
-  const guardar = async () => {
-    if (!form.nombre.trim() || !form.direccion.trim()) return;
-
-    const formData = new FormData();
-    formData.append("nombre", form.nombre);
-    formData.append("direccion", form.direccion);
-    formData.append("telefono", form.telefono);
-    formData.append("usuario_id", form.usuario_id);
-    if (form.logoFile) {
-      formData.append("logo", form.logoFile);
+  // Guardar o actualizar colegio
+  const guardar = async (): Promise<void> => {
+    if (!form.nombre.trim() || !form.direccion.trim()) {
+      alert("Nombre y dirección son obligatorios.");
+      return;
     }
-  
+
+    const payload = new FormData();
+    payload.append("nombre", form.nombre);
+    payload.append("direccion", form.direccion);
+    payload.append("telefono", form.telefono);
+    payload.append("usuario_id", form.usuario_id);
+    if (form.logoFile) {
+      payload.append("logo", form.logoFile);
+    }
+
     try {
       if (editando) {
-        // EDITAR colegio existente
-        await AxiosInstance.put(`/institucion/editar-colegio/${editando.id}/`, formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-
+        await AxiosInstance.put(
+          `/institucion/editar-colegio/${editando.id}/`,
+          payload,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
         setColegios((prev) =>
           prev.map((c) =>
             c.id === editando.id
               ? {
-                ...c,
-                nombre: form.nombre,
-                direccion: form.direccion,
-                telefono: form.telefono,
-                logoUrl: form.logoPreview,
-              }
+                  ...c,
+                  nombre: form.nombre,
+                  direccion: form.direccion,
+                  telefono: form.telefono,
+                  logoUrl: form.logoPreview,
+                }
               : c
           )
         );
       } else {
-        // CREAR nuevo colegio
-        const res = await AxiosInstance.post("/institucion/nuevo-colegio/", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
-
-        const nuevoColegio = res.data;
-        setColegios((prev) => [...prev, nuevoColegio]);
+        const res = await AxiosInstance.post<Colegio>(
+          "/institucion/nuevo-colegio/",
+          payload,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
+        setColegios((prev) => [...prev, res.data]);
         alert("✅ Colegio creado exitosamente");
       }
-
       setShowForm(false);
     } catch (err) {
-      console.error("Error al guardar:", err);
-      alert("Ocurrió un error al guardar el colegio.");
+      console.error("Error al guardar colegio:", err);
       alert("❌ Ocurrió un error al guardar el colegio.");
     }
   };
 
-  // 6 · BORRAR colegio
-  const borrar = async (id: string) => {
+  // Eliminar colegio
+  const borrar = async (id: string): Promise<void> => {
     if (!confirm("¿Seguro que deseas eliminar este colegio?")) return;
-
     try {
       await AxiosInstance.delete(`/institucion/eliminar-colegio/${id}/`);
       setColegios((prev) => prev.filter((c) => c.id !== id));
@@ -194,39 +209,58 @@ export default function SuperAdminColegios() {
             <div>
               <label className="block mb-1 font-medium">Nombre</label>
               <input
+                type="text"
                 value={form.nombre}
-                onChange={(e) => setForm({ ...form, nombre: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, nombre: e.target.value })
+                }
                 className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
                 placeholder="Nombre del colegio"
               />
             </div>
+
             {/* Teléfono */}
             <div>
               <label className="block mb-1 font-medium">Teléfono</label>
               <input
+                type="text"
                 value={form.telefono}
-                onChange={(e) => setForm({ ...form, telefono: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, telefono: e.target.value })
+                }
                 className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
                 placeholder="+591 7xxxxxxx"
               />
             </div>
+
             {/* Dirección */}
             <div className="md:col-span-2">
               <label className="block mb-1 font-medium">Dirección</label>
               <input
+                type="text"
                 value={form.direccion}
-                onChange={(e) => setForm({ ...form, direccion: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, direccion: e.target.value })
+                }
                 className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
                 placeholder="Av. Ejemplo 123, Calle 45 Nº6"
               />
             </div>
+
             {/* Logo */}
             <div className="md:col-span-2">
-              <label className="block mb-1 font-medium">Logo del colegio</label>
+              <label className="block mb-1 font-medium">
+                Logo del colegio
+              </label>
               <div className="flex items-center gap-4">
                 <label className="bg-blue-100 hover:bg-blue-200 text-blue-800 px-4 py-2 rounded-lg cursor-pointer">
                   Seleccionar archivo
-                  <input type="file" accept="image/*" onChange={onFileChange} className="hidden" />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={onFileChange}
+                    className="hidden"
+                  />
                 </label>
                 {form.logoPreview && (
                   <img
@@ -238,26 +272,24 @@ export default function SuperAdminColegios() {
               </div>
             </div>
 
-
+            {/* Superadmin */}
             <div className="md:col-span-2">
               <label className="block mb-1 font-medium">Superadmin</label>
               <select
                 value={form.usuario_id}
-                onChange={(e) => setForm({ ...form, usuario_id: e.target.value })}
+                onChange={(e) =>
+                  setForm({ ...form, usuario_id: e.target.value })
+                }
                 className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-300"
               >
                 <option value="">Seleccione un Superadmin</option>
-                {superadmins.map((admin) => (
-                  <option key={admin.id} value={admin.id}>
-                    {admin.nombre}
+                {superadmins.map((sa) => (
+                  <option key={sa.id} value={sa.id.toString()}>
+                    {sa.nombre}
                   </option>
                 ))}
               </select>
-
             </div>
-
-
-
           </div>
 
           <div className="mt-6 flex justify-end gap-3">
@@ -286,7 +318,7 @@ export default function SuperAdminColegios() {
               <th className="px-4 py-3 text-left">Nombre</th>
               <th className="px-4 py-3 text-left">Dirección</th>
               <th className="px-4 py-3 text-left">Teléfono</th>
-              <th className="px-4 py-3 text-right">Acciones</th>
+              <th className="px-4 py-3 text-left">Acciones</th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -296,23 +328,13 @@ export default function SuperAdminColegios() {
                   {c.logoUrl ? (
                     <img
                       src={c.logoUrl}
-                      alt="Logo"
+                      alt={`Logo de ${c.nombre}`}
                       className="w-10 h-10 object-cover rounded-lg border"
                     />
                   ) : (
-                    <td className="px-4 py-3">
-                      {c.logoUrl ? (
-                        <img
-                          src={c.logoUrl}
-                          alt={`Logo de ${c.nombre}`}
-                          className="w-10 h-10 object-cover rounded-lg border"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center text-xs text-gray-500">
-                          N/A
-                        </div>
-                      )}
-                    </td>
+                    <div className="w-10 h-10 bg-gray-200 rounded-lg flex items-center justify-center text-xs text-gray-500">
+                      N/A
+                    </div>
                   )}
                 </td>
                 <td className="px-4 py-3">{c.nombre}</td>
@@ -344,7 +366,9 @@ export default function SuperAdminColegios() {
                     <button
                       onClick={async () => {
                         try {
-                          const res = await AxiosInstance.get("/institucion/listar-colegios/");
+                          const res = await AxiosInstance.get<any[]>(
+                            "/institucion/listar-colegios/"
+                          );
                           setColegios(res.data);
                         } catch (error) {
                           console.error("Error al recargar colegios:", error);
@@ -364,4 +388,6 @@ export default function SuperAdminColegios() {
       </div>
     </section>
   );
-}
+};
+
+export default SuperAdminColegios;

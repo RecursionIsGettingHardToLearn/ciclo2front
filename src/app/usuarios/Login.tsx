@@ -33,7 +33,8 @@ const Login = () => {
       const { token, user } = response.data;
       console.log("Rol del usuario:", user.rol.nombre); // Log del rol del usuario
   
-      localStorage.setItem("token", token); // Guarda el token
+      localStorage.setItem("token", token); 
+      localStorage.setItem("datosDelUsuario", JSON.stringify(response.data)); // Guarda los datos del usuario
   
       setErrorMsg("");
       console.log(`Bienvenido, ${user.username} (${user.rol})`);
@@ -41,7 +42,7 @@ const Login = () => {
       // Redirección según el rol
       console.log(user.rol.nombre)
       switch (user.rol.nombre) {
-        case "alumno":
+        case "estudiante":
           navigate("/dashboard/alumno", { state: { user } });
           break;
         case "tutor":
@@ -53,7 +54,7 @@ const Login = () => {
         case "admin":
           navigate("/dashboard/admin", { state: { user } });
           break;
-        case "SuperAdmin":
+        case "superadmin":
           navigate("/dashboard/superadmin", { state: { user } });
           break;
         default:
@@ -94,6 +95,17 @@ const Login = () => {
             <Button onClick={handleLogin} className="w-full">
               Iniciar sesión
             </Button>
+          </div>       
+          <div className="text-center mt-4">
+            <p className="text-sm">
+              ¿No tienes una cuenta?{" "}
+              <span
+                onClick={() => navigate("/register")}
+                className="text-blue-500 cursor-pointer hover:underline"
+              >
+                Regístrate
+              </span>
+            </p>
           </div>
         </CardContent>
       </Card>

@@ -14,15 +14,7 @@ import PerfilModal from "./SuperAdminPerfil"; // Asegúrate de tener este compon
 import AxiosInstance from "../../components/AxiosInstance";
 
 // const API_BASE_URL: string = import.meta.env.VITE_API_BASE_URL_LOCAL as string;
-
-interface Usuario {
-  nombre: string;
-  apellido: string;
-  email: string;
-  fechaNacimiento: string;
-  username: string;
-  foto: string | null;
-}
+import { Usuario } from "../modelos/Usuarios"; // Asegúrate de que esta ruta sea correcta
 
 type NavItem = {
   to: string;
@@ -49,6 +41,10 @@ const items: NavItem[] = [
     icon: Layers,
   },
 ];
+
+function isFile(x: unknown): x is File {
+  return x instanceof File;
+}
 
 const SuperAdminLayout: React.FC = (): JSX.Element => {
   const [user, setUser] = useState<Usuario | null>(null);
@@ -168,16 +164,26 @@ const SuperAdminLayout: React.FC = (): JSX.Element => {
 
       {/* Modal de perfil */}
       {showPerfil && user && (
-        <PerfilModal
-          user={user}
-          onClose={() => setShowPerfil(false)}
-          onLogout={logout}
-          onSave={(data: Usuario) => {
-            console.log("Guardar perfil:", data);
-            // podrías invocar aquí API para actualizar perfil...
-          }}
-        />
-      )}
+      <PerfilModal
+        user={{
+          nombre:           user.nombre,
+          apellido:         user.apellido,
+          email:            user.email,
+          fecha_nacimiento: user.fecha_nacimiento ?? "",
+          username:         user.username,
+          // casteo a `any` para que TS acepte el instanceof:
+          foto: isFile(user.foto)
+            ? user.foto
+            : (user.foto ?? null),
+        }}
+        onClose={() => setShowPerfil(false)}
+        onSave={(data: Usuario) => {
+          console.log("Guardar perfil:", data);
+          // API de actualización...
+        }}
+        onLogout={logout}
+      />
+    )}
     </>
   );
 };

@@ -4,27 +4,31 @@ import AxiosInstance from "../../components/AxiosInstance"; // Asegúrate de que
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL_LOCAL;
 
+
+
 interface Props {
-  user: {
+  user:  {
     nombre: string;
     apellido: string;
     email: string;
-    fechaNacimiento: string;
+    fecha_nacimiento: string;
     username: string;
-    foto: string | null;
+    // Ahora permitimos File además de string y null
+    foto: string | File | null;
   };
   onClose: () => void;
   onSave: (data: any) => void;
   onLogout: () => Promise<void>;
 }
 
-export default function PerfilModal({ user, onClose, onSave }: Props) {
+export default function PerfilModal({ user, onClose, onSave, onLogout }: Props) {
   const [form, setForm] = useState({
     ...user,
     password: "",
     fotoFile: null as File | null,
-    fotoPreview: user.foto,
+    fotoPreview: typeof user.foto === "string" ? user.foto : null,
   });
+
 
   const changeFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0] ?? null;
@@ -35,6 +39,7 @@ export default function PerfilModal({ user, onClose, onSave }: Props) {
   const guardar = () => {
     onSave(form);
     onClose();
+    onLogout();
   };
 
   const handleLogout = async () => {
@@ -100,8 +105,8 @@ export default function PerfilModal({ user, onClose, onSave }: Props) {
           />
           <input
             type="date"
-            value={form.fechaNacimiento}
-            onChange={(e) => setForm({ ...form, fechaNacimiento: e.target.value })}
+            value={form.fecha_nacimiento}
+            onChange={(e) => setForm({ ...form, fecha_nacimiento: e.target.value })}
             className="w-full border rounded-lg px-3 py-2"
           />
           <input

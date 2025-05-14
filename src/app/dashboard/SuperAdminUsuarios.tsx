@@ -5,24 +5,8 @@ import {
   ChevronUp, ChevronDown,
 } from "lucide-react";
 import AxiosInstance from "../../components/AxiosInstance";
-
-interface Rol {
-  id: number;
-  nombre: string;
-}
-
-interface Usuario {
-  id: string;
-  fecha_nacimiento: string;
-  nombre: string;
-  apellido: string;
-  ci: string;
-  email: string;
-  username: string;
-  password: string;
-  rol: Rol;
-  foto: File | null;
-}
+import { Usuario } from "../modelos/Usuarios";
+import { Rol } from "../modelos/Usuarios";
 
 const columnas: Array<keyof Usuario> = [
   "nombre",
@@ -38,16 +22,21 @@ const columnas: Array<keyof Usuario> = [
 ];
 
 const emptyUser: Usuario = {
-  id: "",
+  id: 0,
+  ci: "",
   nombre: "",
   apellido: "",
   foto: null,
-  ci: "",
   email: "",
-  fecha_nacimiento: "",
-  rol: { id: 0, nombre: "" },
+  fecha_nacimiento: null,      // o "" si tu tipo lo permite
   username: "",
-  password: "",
+  estado: false,               // ¡obligatorio!
+  rol: new Rol({ id: 0, nombre: "" }),  
+  telefono: null,              // si tu tipo lo hace opcional
+  password: null,    // opcional
+  is_staff: false,             // obligatorio
+  is_active: false,            // obligatorio
+  date_joined: new Date().toISOString(),  // obligatorio
 };
 
 interface UsuarioFormModalProps {
@@ -60,7 +49,7 @@ export default function SuperAdminUsuarios() {
 
   const [rows, setRows] = useState<typeof emptyUser[]>([]);
   const [editUser, setEditUser] = useState<Usuario | null>(null)
-const [modalOpen, setModalOpen] = useState(false)
+  const [modalOpen, setModalOpen] = useState(false)
   const [ciQuery, /*setCiQuery*/] = useState("");
   const [sort, setSort] = useState({ key: "nombre", asc: true });
   useEffect(() => {
@@ -146,7 +135,7 @@ const [modalOpen, setModalOpen] = useState(false)
   
     try {
       await AxiosInstance.delete(`/user/auth/eliminar-usuario/${id}/`);
-      setRows(r => r.filter(x => x.id !== id));
+      setRows(r => r.filter(x => x.id !== Number(id)));
     } catch (err) {
       console.error("Error al eliminar usuario:", err);
       alert("Ocurrió un error al eliminar el usuario.");
@@ -177,34 +166,37 @@ const [modalOpen, setModalOpen] = useState(false)
           Search bar end */}
 
         <div className="overflow-x-auto bg-white rounded-xl shadow">
-          <table className="min-w-full text-sm">
+        <table className="min-w-full text-sm">
           <thead className="bg-blue-100 text-blue-600">
-            {columnas.map((k) => (
-              <th
-                key={k}
-                onClick={() => sortBy(k)}
-                className="px-4 py-3 text-left cursor-pointer select-none"
-              >
-                <span className="inline-flex items-center gap-1">
-                  {k.charAt(0).toUpperCase() + k.slice(1)}
-                  {sort.key === k && (
-                    sort.asc
-                      ? <ChevronUp className="w-4 h-4" />
-                      : <ChevronDown className="w-4 h-4" />
-                  )}
-                </span>
-              </th>
-            ))}
-            <th className="px-4 py-3 text-right">Acciones</th>
-        </thead>
-            <tbody className="divide-y">
-              {ordered.length === 0 ? (
-                <tr>
-                  <td colSpan={7} className="p-8 text-center text-gray-500">
-                    Sin usuarios
-                  </td>
-                </tr>
-              ) : ordered.map((u) => (
+            <tr>
+              {columnas.map((k) => (
+                <th
+                  key={k}
+                  onClick={() => sortBy(k)}
+                  className="px-4 py-3 text-left cursor-pointer select-none"
+                >
+                  <span className="inline-flex items-center gap-1">
+                    {k.charAt(0).toUpperCase() + k.slice(1)}
+                    {sort.key === k && (
+                      sort.asc
+                        ? <ChevronUp className="w-4 h-4" />
+                        : <ChevronDown className="w-4 h-4" />
+                    )}
+                  </span>
+                </th>
+              ))}
+              <th className="px-4 py-3 text-right">Acciones</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {ordered.length === 0 ? (
+              <tr>
+                <td colSpan={columnas.length + 1} className="p-8 text-center text-gray-500">
+                  Sin usuarios
+                </td>
+              </tr>
+            ) : (
+              ordered.map((u) => (
                 <tr key={u.id} className="hover:bg-blue-50">
                   <td className="px-4 py-3">{u.nombre}</td>
                   <td className="px-4 py-3">{u.apellido}</td>
@@ -212,29 +204,28 @@ const [modalOpen, setModalOpen] = useState(false)
                   <td className="px-4 py-3">{u.email}</td>
                   <td className="px-4 py-3">{u.rol.nombre}</td>
                   <td className="px-4 py-3">{u.username || "—"}</td>
-                  <td className="px-4 py-3">
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => { setEditUser(u); setModalOpen(true); }}
-                        className="p-1 text-blue-600 hover:bg-blue-100 rounded"
-                        title="Editar"
-                      >
-                        <Pencil className="w-5 h-5" />
-                      </button>
-                      <button
-                        onClick={() => del(u.id)}
-                        className="p-1 text-red-600 hover:bg-red-100 rounded"
-                        title="Eliminar"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </div>
+                  <td className="px-4 py-3 flex justify-end gap-2">
+                    <button
+                      onClick={() => { setEditUser(u); setModalOpen(true); }}
+                      className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+                      title="Editar"
+                    >
+                      <Pencil className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => del(String(u.id))}
+                      className="p-1 text-red-600 hover:bg-red-100 rounded"
+                      title="Eliminar"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
                   </td>
                 </tr>
-              ))}
-            </tbody>
+              ))
+            )}
+          </tbody>
+        </table>
 
-          </table>
         </div>
 
         {modalOpen && (
@@ -347,7 +338,7 @@ function UsuarioFormModal({ initial, onCancel, onSave } : UsuarioFormModalProps)
               <input
                 name="fechaNacimiento"
                 type="date"
-                value={form.fecha_nacimiento}
+                value={form.fecha_nacimiento ?? ""}
                 onChange={handle}
                 className="pl-10 w-full border rounded py-2"
               />
@@ -392,7 +383,7 @@ function UsuarioFormModal({ initial, onCancel, onSave } : UsuarioFormModalProps)
             <input
               name="password"
               type="password"
-              value={form.password}
+              value={form.password ?? ""}
               onChange={handle}
               className="pl-3 w-full border rounded py-2"
               placeholder="Contraseña"

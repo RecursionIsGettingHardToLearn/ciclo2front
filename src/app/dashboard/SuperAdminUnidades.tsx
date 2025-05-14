@@ -22,26 +22,44 @@ interface Admin {
 }
 
 interface UnidadRow {
-  id: string;
-  nombre: string;
-  colegioId: string;
-  adminId: string;
+  /** PK de la unidad educativa */
+  id: number;
+
+  /** Código SIE (único) */
   codigoSie: string;
-  turno: string;
-  nivel: string;
-  direccion?: string;
-  telefono?: string;
+
+  /** Turno según las opciones definidas en el modelo */
+  turno: 'MAÑANA' | 'TARDE' | 'NOCHE' | 'COMPLETO';
+
+  /** Nombre (opcional) */
+  nombre?: string | null;
+
+  /** Nivel (opcional) */
+  nivel?: string | null;
+
+  /** Dirección (opcional) */
+  direccion?: string | null;
+
+  /** Teléfono (opcional) */
+  telefono?: string | null;
+
+  /** FK a Admin (nullable) */
+  adminId?: number | null;
+
+  /** FK a Colegio (nullable) */
+  colegioId?: number | null;
 }
 
 interface FormState {
+  id?: number;
   nombre: string;
   codigoSie: string;
-  turno: string;
+  turno: 'MAÑANA' | 'TARDE' | 'NOCHE' | 'COMPLETO';
   nivel: string;
-  colegioId: string;
+  colegioId: number | null;
   direccion: string;
   telefono: string;
-  adminId: string;
+  adminId: number | null;
 }
 
 type SortConfig = {
@@ -53,14 +71,15 @@ type SortConfig = {
 export default function SuperAdminUnidades(): JSX.Element {
   // Estado del formulario
   const [form, setForm] = useState<FormState>({
-    nombre: "",
-    codigoSie: "",
-    turno: "",
-    nivel: "",
-    colegioId: "",
-    direccion: "",
-    telefono: "",
-    adminId: "",
+    id: undefined,
+    nombre: '',
+    codigoSie: '',
+    turno: 'MAÑANA',
+    nivel: '',
+    colegioId: null,
+    direccion: '',
+    telefono: '',
+    adminId: null,
   });
 
   // Listas de datos
@@ -89,6 +108,8 @@ export default function SuperAdminUnidades(): JSX.Element {
       }
     };
 
+    // console.log(colegios[0].id)
+
     const cargarAdmins = async (): Promise<void> => {
       try {
         const res = await AxiosInstance.get<Admin[]>(
@@ -111,16 +132,16 @@ export default function SuperAdminUnidades(): JSX.Element {
         const res = await AxiosInstance.get<any[]>(
           "/institucion/listar-unidades-educativas/"
         );
-        const unidades = res.data.map((u) => ({
-          id: String(u.id),
-          nombre: u.nombre || "—",
-          colegioId: u.colegio?.id || "",
-          adminId: String(u.administrador_id || ""),
+        const unidades: UnidadRow[] = res.data.map((u: any) => ({
+          id: u.id as number,
           codigoSie: u.codigo_sie,
-          turno: u.turno,
-          nivel: u.nivel,
-          direccion: u.direccion,
-          telefono: u.telefono,
+          turno: u.turno as 'MAÑANA' | 'TARDE' | 'NOCHE' | 'COMPLETO',
+          nombre: u.nombre ?? null,
+          nivel: u.nivel ?? null,
+          direccion: u.direccion ?? null,
+          telefono: u.telefono ?? null,
+          adminId: u.admin_fk?.id ?? null,
+          colegioId: u.colegio?.id ?? null,
         }));
         setRows(unidades);
       } catch (error) {
@@ -138,14 +159,15 @@ export default function SuperAdminUnidades(): JSX.Element {
   // Iniciar creación de nueva unidad
   const nuevo = (): void => {
     setForm({
-      nombre: "",
-      codigoSie: "",
-      turno: "",
-      nivel: "",
-      colegioId: "",
-      direccion: "",
-      telefono: "",
-      adminId: "",
+      id: 0,
+      nombre: '',
+      codigoSie: '',
+      turno: 'MAÑANA',
+      nivel: '',
+      colegioId: null,
+      direccion: '',
+      telefono: '',
+      adminId: null,
     });
     setAdminQuery("");
     setEdit(null);
@@ -155,16 +177,21 @@ export default function SuperAdminUnidades(): JSX.Element {
   // Preparar edición de unidad existente
   const editar = (u: UnidadRow): void => {
     setForm({
-      nombre: u.nombre,
+      id: u.id,
+      nombre: u.nombre ?? '',
       codigoSie: u.codigoSie,
       turno: u.turno,
-      nivel: u.nivel,
-      colegioId: u.colegioId,
-      direccion: u.direccion || "",
-      telefono: u.telefono || "",
-      adminId: u.adminId,
+      nivel: u.nivel ?? '',
+      colegioId: u.colegioId ?? null,
+      direccion: u.direccion ?? '',
+      telefono: u.telefono ?? '',
+      adminId: u.adminId ?? null,
     });
-    setAdminQuery(admins.find((a) => a.id === u.adminId)?.ci || "");
+  
+    // Si adminQuery es un string de la cédula:
+    setAdminQuery(
+      admins.find(a => Number(a.id) === u.adminId)?.ci ?? ""
+    );
     setEdit(u);
     setOpen(true);
   };
@@ -210,7 +237,7 @@ export default function SuperAdminUnidades(): JSX.Element {
           "/institucion/nueva-unidad-educativa/",
           payload
         );
-        setRows((prev) => [...prev, { id: res.data.id, ...form }]);
+        setRows((prev) => [...prev, { id: Number(res.data.id), ...form }]);
         alert("Unidad educativa creada correctamente.");
       }
       setOpen(false);
@@ -228,7 +255,7 @@ export default function SuperAdminUnidades(): JSX.Element {
       await AxiosInstance.delete(
         `/institucion/eliminar-unidad-educativa/${id}/`
       );
-      setRows((prev) => prev.filter((x) => x.id !== id));
+      setRows((prev) => prev.filter((x) => x.id !== Number(id)));
       alert("Unidad educativa eliminada correctamente.");
     } catch (error) {
       console.error("Error al eliminar unidad educativa:", error);
@@ -302,11 +329,11 @@ export default function SuperAdminUnidades(): JSX.Element {
             <div>
               <label className="font-medium">Colegio</label>
               <select
-                value={form.colegioId}
+                value={form.colegioId ?? ""}
                 onChange={(e) =>
                   setForm((f) => ({
                     ...f,
-                    colegioId: e.target.value,
+                    colegioId: e.target.value ? Number(e.target.value) : null,
                   }))
                 }
                 className="w-full border rounded-lg px-3 py-2"
@@ -341,7 +368,7 @@ export default function SuperAdminUnidades(): JSX.Element {
                 onChange={(e) =>
                   setForm((f) => ({
                     ...f,
-                    turno: e.target.value,
+                    turno: e.target.value as 'MAÑANA' | 'TARDE' | 'NOCHE' | 'COMPLETO',
                   }))
                 }
                 className="w-full border rounded-lg px-3 py-2"
@@ -419,7 +446,7 @@ export default function SuperAdminUnidades(): JSX.Element {
                    <li
                      key={a.id}
                      onClick={() => {
-                       setForm(f => ({ ...f, adminId: a.id }));
+                       setForm(f => ({ ...f, adminId: Number(a.id) }));
                        setAdminQuery(`${a.nombre} — ${a.ci}`);
                      }}
                      className="px-3 py-1 cursor-pointer hover:bg-blue-100"
@@ -451,8 +478,9 @@ export default function SuperAdminUnidades(): JSX.Element {
 
       {/* Tabla de unidades */}
       <div className="overflow-x-auto bg-white rounded-xl shadow">
-        <table className="min-w-full text-sm">
-          <thead className="bg-blue-50 text-blue-600 select-none">
+      <table className="min-w-full text-sm">
+        <thead className="bg-blue-50 text-blue-600 select-none">
+          <tr>
             {(
               [
                 ["nombre", "Nombre unidad"],
@@ -483,51 +511,52 @@ export default function SuperAdminUnidades(): JSX.Element {
               );
             })}
             <th className="px-4 py-3 text-right">Acciones</th>
-          </thead>
-          <tbody className="divide-y">
-            {filasOrdenadas.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="p-8 text-center text-gray-500">
-                  Sin unidades registradas
-                </td>
-              </tr>
-            ) : (
-              filasOrdenadas.map((u) => {
-                const col = colegios.find((c) => c.id === u.colegioId)
-                  ?.nombre;
-                const adm = admins.find((a) => a.id === u.adminId);
-                return (
-                  <tr key={u.id} className="hover:bg-blue-50">
-                    <td className="px-4 py-3">{u.nombre}</td>
-                    <td className="px-4 py-3">{col}</td>
-                    <td className="px-4 py-3">{u.codigoSie}</td>
-                    <td className="px-4 py-3">{u.turno}</td>
-                    <td className="px-4 py-3">{u.nivel}</td>
-                    <td className="px-4 py-3">
-                      {adm?.nombre} — {adm?.ci}
-                    </td>
-                    <td className="px-4 py-3 text-right flex justify-end gap-2">
-                      <button
-                        onClick={() => editar(u)}
-                        className="p-1 text-blue-600 hover:bg-blue-100 rounded"
-                        title="Editar"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => eliminar(u.id)}
-                        className="p-1 text-red-600 hover:bg-red-100 rounded"
-                        title="Eliminar"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })
-            )}
-          </tbody>
-        </table>
+          </tr>
+        </thead>
+        <tbody className="divide-y">
+          {filasOrdenadas.length === 0 ? (
+            <tr>
+              <td colSpan={7} className="p-8 text-center text-gray-500">
+                Sin unidades registradas
+              </td>
+            </tr>
+          ) : (
+            filasOrdenadas.map((u) => {
+              const col = colegios.find((c) => c.id === String(u.colegioId))?.nombre;
+              const adm = admins.find((a) => a.id === String(u.adminId));
+              return (
+                <tr key={u.id} className="hover:bg-blue-50">
+                  <td className="px-4 py-3">{u.nombre}</td>
+                  <td className="px-4 py-3">{col}</td>
+                  <td className="px-4 py-3">{u.codigoSie}</td>
+                  <td className="px-4 py-3">{u.turno}</td>
+                  <td className="px-4 py-3">{u.nivel}</td>
+                  <td className="px-4 py-3">
+                    {adm?.nombre} — {adm?.ci}
+                  </td>
+                  <td className="px-4 py-3 text-right flex justify-end gap-2">
+                    <button
+                      onClick={() => editar(u)}
+                      className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+                      title="Editar"
+                    >
+                      <Pencil className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => eliminar(String(u.id))}
+                      className="p-1 text-red-600 hover:bg-red-100 rounded"
+                      title="Eliminar"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </td>
+                </tr>
+              );
+            })
+          )}
+        </tbody>
+      </table>
+
       </div>
     </section>
   );

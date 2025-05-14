@@ -90,21 +90,25 @@ export default function SuperAdminInfraestructura() {
 
     if (m.id) {
       // Módulo existente → PUT
-      AxiosInstance.put(`institucion/editar-modulo/${m.id}/`, {
-        nombre: m.nombre,
-        cantidad_aulas: m.cantidadAulas,
-        descripcion: "", // si tienes este campo en backend
+      AxiosInstance.put(
+        `institucion/editar-modulo/${m.id}/`,
+        {
+          nombre: m.nombre,
+          cantidad_aulas: m.cantidadAulas,
+          descripcion: "", // si lo usas en el backend
+        }
+      )
+      .then(() => {              //  <-- ya no hay `res`
+        setModulos(list =>
+          list.map(x => (x.id === m.id ? { ...m } : x))
+        );
+        setModalMod(null);
       })
-        .then(res => {
-          setModulos(list =>
-            list.map(x => (x.id === m.id ? { ...m } : x))
-          );
-          setModalMod(null);
-        })
-        .catch(err => {
-          console.error("Error al editar módulo", err);
-          alert("No se pudo actualizar el módulo.");
-        });
+      .catch(err => {
+        console.error("Error al editar módulo", err);
+        alert("No se pudo actualizar el módulo.");
+      });
+      
     } else {
       alert(`Datos a enviar:\n\nNombre: ${m.nombre}\nAulas: ${m.cantidadAulas}\nColegio ID: ${m.colegioId}`);
       // Módulo nuevo → POST
@@ -404,7 +408,7 @@ function FormModulo({
 
 function GestorAulas({
   modulo,
-  aulas,
+  // aulas,
   onSave,
   onDelete,
 }: {
@@ -441,7 +445,7 @@ function GestorAulas({
     `${a.nombre}${a.tipo}${a.estado}`.toLowerCase().includes(search.toLowerCase())
   );
 
-  const handleSave = (a: Aula) => {
+ /* const handleSave = (a: Aula) => {
     onSave(a);
     setLoadedAulas(prev =>
       prev.find(x => x.id === a.id)
@@ -453,7 +457,7 @@ function GestorAulas({
   const handleDelete = (id: string) => {
     onDelete(id);
     setLoadedAulas(prev => prev.filter(x => x.id !== id));
-  };
+  }; */
 
   return (
     <div className="space-y-5">

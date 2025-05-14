@@ -61,7 +61,7 @@ export default function SuperAdminUsuarios() {
   const [rows, setRows] = useState<typeof emptyUser[]>([]);
   const [editUser, setEditUser] = useState<Usuario | null>(null)
 const [modalOpen, setModalOpen] = useState(false)
-  const [ciQuery, setCiQuery] = useState("");
+  const [ciQuery, /*setCiQuery*/] = useState("");
   const [sort, setSort] = useState({ key: "nombre", asc: true });
   useEffect(() => {
     AxiosInstance.get("/user/auth/listar-usuarios/")

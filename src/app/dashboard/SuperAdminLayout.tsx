@@ -13,8 +13,7 @@ import clsx from "clsx";
 import PerfilModal from "./SuperAdminPerfil"; // Asegúrate de tener este componente
 import AxiosInstance from "../../components/AxiosInstance";
 
-const API_BASE_URL: string = import.meta.env
-  .VITE_API_BASE_URL_LOCAL as string;
+// const API_BASE_URL: string = import.meta.env.VITE_API_BASE_URL_LOCAL as string;
 
 interface Usuario {
   nombre: string;

@@ -1,7 +1,4 @@
 // src/app/usuarios/NotFound.tsx
-import { ConeIcon } from "lucide-react";
-import React from "react";
-
 const NotFound = () => {
     console.log("404 - Página no encontrada");
   return (

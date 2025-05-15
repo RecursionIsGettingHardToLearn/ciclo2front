@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { X, LogOut } from "lucide-react";
-import AxiosInstance from "../../components/AxiosInstance"; // Asegúrate de que esta ruta sea correcta
+import AxiosInstance from "../../../components/AxiosInstance";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL_LOCAL;
 
@@ -13,15 +13,13 @@ interface Props {
     email: string;
     fecha_nacimiento: string;
     username: string;
-    // Ahora permitimos File además de string y null
     foto: string | File | null;
   };
   onClose: () => void;
   onSave: (data: any) => void;
-  onLogout: () => Promise<void>;
 }
 
-export default function PerfilModal({ user, onClose, onSave, onLogout }: Props) {
+export default function PerfilModal({ user, onClose, onSave }: Props) {
   const [form, setForm] = useState({
     ...user,
     password: "",
@@ -39,7 +37,6 @@ export default function PerfilModal({ user, onClose, onSave, onLogout }: Props) 
   const guardar = () => {
     onSave(form);
     onClose();
-    onLogout();
   };
 
   const handleLogout = async () => {

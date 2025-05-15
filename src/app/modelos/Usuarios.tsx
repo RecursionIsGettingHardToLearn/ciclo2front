@@ -23,6 +23,7 @@ export class Usuario {
   foto?: string | null;
   nombre: string;
   apellido: string;
+  sexo: string;
   email: string;
   fecha_nacimiento?: string | null;
   username: string;
@@ -40,6 +41,7 @@ export class Usuario {
     foto?: string | null;
     nombre: string;
     apellido: string;
+    sexo: string;
     email: string;
     fecha_nacimiento?: string | null;
     username: string;
@@ -56,6 +58,7 @@ export class Usuario {
     this.foto = data.foto ?? null;
     this.nombre = data.nombre;
     this.apellido = data.apellido;
+    this.sexo = data.sexo;
     this.email = data.email;
     this.fecha_nacimiento = data.fecha_nacimiento ?? null;
     this.username = data.username;

@@ -1,15 +1,15 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axios from "../../components/AxiosInstance";
-
+import AxiosInstance from "@/components/AxiosInstance";
 export default function SuperAdminInicio() {
   const [cantidadColegios, setCantidadColegios] = useState<number | null>(null);
   const [cantidadUnidades, setCantidadUnidades] = useState<number | null>(null);
   const [cantidadUsuarios, setCantidadUsuarios] = useState<number | null>(null);
 
+
   useEffect(() => {
     // Colegios
-    axios
+    AxiosInstance
       .get("/institucion/cantidad-colegios")
       .then(res => setCantidadColegios(res.data.cantidad_colegios))
       .catch(error => {
@@ -18,7 +18,7 @@ export default function SuperAdminInicio() {
       });
 
     // Unidades educativas
-    axios
+    AxiosInstance
       .get("/institucion/cantidad-unidades-educativas/")
       .then(res => setCantidadUnidades(res.data.cantidad_unidades_educativas))
       .catch(error => {
@@ -27,7 +27,7 @@ export default function SuperAdminInicio() {
       });
 
     // Usuarios
-    axios
+    AxiosInstance
       .get("/user/auth/cantidad/")
       .then(res => setCantidadUsuarios(res.data.cantidad_usuarios))
       .catch(error => {

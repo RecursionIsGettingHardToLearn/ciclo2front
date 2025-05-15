@@ -10,11 +10,11 @@ import {
   LogOut,
 } from "lucide-react";
 import clsx from "clsx";
-import PerfilModal from "./SuperAdminPerfil"; // Asegúrate de tener este componente
-import AxiosInstance from "../../components/AxiosInstance";
+import PerfilModal from "./Perfil"; // Asegúrate de tener este componente
+import AxiosInstance from "@/components/AxiosInstance";
 
 // const API_BASE_URL: string = import.meta.env.VITE_API_BASE_URL_LOCAL as string;
-import { Usuario } from "../modelos/Usuarios"; // Asegúrate de que esta ruta sea correcta
+import { Usuario } from "@/app/modelos/Usuarios"; // Asegúrate de que esta ruta sea correcta
 
 type NavItem = {
   to: string;

@@ -10,12 +10,12 @@ import Register from "./app/usuarios/Register";
 
 
 // Layout y páginas Super Admin
-import SuperAdminLayout from "./app/dashboard/SuperAdminLayout";
-import SuperAdminInicio from "./app/dashboard/SuperAdminInicio";
-import SuperAdminColegios from "./app/dashboard/SuperAdminColegios";
-import SuperAdminUnidades from "./app/dashboard/SuperAdminUnidades"; // ← corregido
-import SuperAdminUsuarios from "./app/dashboard/SuperAdminUsuarios";
-import SuperAdminInfraestructura from "./app/dashboard/SuperAdminInfraestructura"; // ← nuevo
+import SuperAdminLayout from "./app/dashboard/SuperAdmin/Layout";
+import SuperAdminInicio from "./app/dashboard/SuperAdmin/Inicio";
+import SuperAdminColegios from "./app/dashboard/SuperAdmin/Colegios";
+import SuperAdminUnidades from "./app/dashboard/SuperAdmin/Unidades"; // ← corregido
+import SuperAdminUsuarios from "./app/dashboard/SuperAdmin/Usuarios";
+import SuperAdminInfraestructura from "./app/dashboard/SuperAdmin/Infraestructura"; // ← nuevo
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>

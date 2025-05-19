@@ -23,6 +23,7 @@ export default function UsuarioFormModal({ initial, onCancel, onSave }: Props) {
       rol: new Rol({ id: 0, nombre: "" }),
       password: null,
       estado: true,
+      sexo:"",
       is_staff: false,
       is_active: true,
       date_joined: new Date().toISOString(),

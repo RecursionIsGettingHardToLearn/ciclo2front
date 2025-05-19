@@ -58,6 +58,7 @@ export default function SuperAdminColegios() {
             fecha_nacimiento: item.usuario.fecha_nacimiento,
             username:   item.usuario.username,
             estado:     item.usuario.estado,
+            sexo:item.usuario.sexo,
             rol:        new Rol({ id: item.usuario.rol.id, nombre: item.usuario.rol.nombre }),
             telefono:            item.usuario.telefono,
             password:  item.usuario.password,

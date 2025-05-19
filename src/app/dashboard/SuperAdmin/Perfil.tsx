@@ -17,6 +17,7 @@ interface Props {
   };
   onClose: () => void;
   onSave: (data: any) => void;
+  onLogout: () => Promise<void>; 
 }
 
 export default function PerfilModal({ user, onClose, onSave }: Props) {

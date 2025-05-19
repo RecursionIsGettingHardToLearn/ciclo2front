@@ -8,6 +8,7 @@ import {
   Layers,
   Menu,
   LogOut,
+  GraduationCap,
 } from "lucide-react";
 import clsx from "clsx";
 import PerfilModal from "./Perfil"; // Asegúrate de tener este componente
@@ -39,6 +40,11 @@ const items: NavItem[] = [
     to: "/dashboard/superadmin/infraestructura",
     label: "Infraestructura",
     icon: Layers,
+  },
+  {
+    to: "/dashboard/superadmin/gestion-academica/materias-cursos",
+    label: "Gestion Academica",
+    icon: GraduationCap,
   },
 ];
 

@@ -16,6 +16,7 @@ import SuperAdminColegios from "./app/dashboard/SuperAdmin/Colegios";
 import SuperAdminUnidades from "./app/dashboard/SuperAdmin/Unidades"; // ← corregido
 import SuperAdminUsuarios from "./app/dashboard/SuperAdmin/Usuarios";
 import SuperAdminInfraestructura from "./app/dashboard/SuperAdmin/Infraestructura"; // ← nuevo
+import MateriaCurso from "./app/gestion-academica/Materia-Curso";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
@@ -25,9 +26,9 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-    
+
         {/* Dashboard Alumno */}
-      
+
 
         {/* Panel Super Admin con rutas anidadas */}
         <Route path="/dashboard/superadmin" element={<SuperAdminLayout />}>
@@ -36,6 +37,12 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           <Route path="unidades" element={<SuperAdminUnidades />} /> {/* ← corregido */}
           <Route path="usuarios" element={<SuperAdminUsuarios />} />
           <Route path="infraestructura" element={<SuperAdminInfraestructura />} /> {/* ← agregado */}
+
+          
+          <Route path="gestion-academica/materias-cursos" element={<MateriaCurso />} /> {/* ← agregado */}
+
+
+
         </Route>
 
         {/* 404 opcional */}
